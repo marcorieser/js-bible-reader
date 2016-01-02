@@ -1,0 +1,92 @@
+@import "normalize";
+
+html {
+  box-sizing: border-box;
+
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  position: relative;
+}
+
+ul.unstyled {
+  margin: 0;
+  padding: 0;
+  li {
+    list-style-type: none;
+    margin-left: 0;
+  }
+}
+
+input[type=checkbox] {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+#wrapper {
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  transition: transform 0.2s;
+  transform: translate3d(0, 0, 0);
+
+  .open & {
+    transform: translate3d(-300px, 0, 0);
+  }
+}
+
+#book-selector {
+  position: absolute;
+  width: 300px;
+  right: 0;
+  height: 100%;
+  top: 0;
+  padding: 30px;
+  overflow: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  transition: transform 0.2s;
+  transform: translate3d(300px, 0, 0);
+
+  .open & {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+#toggler {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  background: red;
+  display: block;
+  cursor: pointer;
+}
+
+#overlay {
+  background: rgba(0, 0, 0, 0.3);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  cursor: pointer;
+
+  .open & {
+    display: block;
+  }
+}

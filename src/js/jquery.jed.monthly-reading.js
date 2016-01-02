@@ -3,12 +3,7 @@
 
 (function ($) {
     $.widget('jed.monthlyReading', {
-        options: {
-            books: []
-        },
         _create: function () {
-            var iterator;
-
             this.books = {
                 'gen': { name: '1. Mose (Genesis)', chapters: 50 },
                 'exo': { name: '2. Mose (Exodus)', chapters: 40 },
@@ -79,14 +74,60 @@
                 'rev': { name: 'Offenbarung', chapters: 22 }
             };
 
+            this.today = new Date();
+
+            this.daysInMonth = this._getDaysInMonth(this.today);
             this.chapterContainer = this.element.find('#chapters');
 
-            this.today = new Date();
-            this.daysInMonth = this._getDaysInMonth(this.today);
+            this.bookSelector = $('<div id="book-selector"></div>').appendTo(this.element.find('body'));
 
-            for (iterator = 0; iterator < this.options.books.length; iterator++) {
-                this.getDailyReading(this.options.books[ iterator ]);
+            this._generateBookSelector();
+
+            this._on(this.bookSelector, {
+                'change input': '_init'
+            });
+
+            this._on({
+                'click #toggler': '_toggleSelector',
+                'click #overlay': '_toggleSelector'
+            })
+
+        },
+        _init: function () {
+            this.selectedBooks = $('input:checkbox:checked').map(function () {
+                return $(this).val();
+            }).get();
+
+            localStorage.setItem('checked', JSON.stringify(this.selectedBooks));
+
+            this.chapterContainer.empty();
+            for (iterator = 0; iterator < this.selectedBooks.length; iterator++) {
+                this.getDailyReading(this.selectedBooks[ iterator ]);
             }
+        },
+
+        _generateBookSelector: function () {
+            var self = this,
+                iterator,
+                checked,
+                nodeString = '<ul class="unstyled">';
+            $.each(this.books, function (key, data) {
+                nodeString += '<li><label for="book-' + key + '"><input type="checkbox" id="book-' + key + '" name="books[]" value="' + key + '">' + data.name + '</label></li>';
+            });
+            nodeString += '</ul>';
+
+            $(nodeString).appendTo(self.bookSelector);
+
+            checked = JSON.parse(localStorage.getItem('checked'));
+            if (checked) {
+                for (iterator = 0; iterator < checked.length; iterator++) {
+                    this.element.find('#book-' + checked[ iterator ]).attr('checked', 'checked')
+                }
+            }
+        },
+
+        _toggleSelector: function () {
+            this.element.toggleClass('open');
         },
 
         _getDaysInMonth: function (date) {
@@ -98,19 +139,39 @@
 
         _getChapters: function (book) {
             var iterator = 0,
+                counter,
                 chapters = [],
-                counter = this.today.getDate(),
+                day = this.today.getDate(),
                 chaptersInBook = this.books[ book ].chapters,
-                perDay = Math.ceil(chaptersInBook / this.daysInMonth);
+                shuffle = this.books[ book ].shuffle || false,
+                perDay = Math.floor(chaptersInBook / this.daysInMonth),
+                overflow = chaptersInBook % this.daysInMonth;
+
+            perDay = day > overflow ? perDay : perDay + 1;
+
+            if (shuffle) {
+                counter = day;
+
+                for (; iterator < perDay; iterator++) {
+                    if (counter > chaptersInBook) {
+                        break;
+                    }
+                    chapters.push(counter);
+                    counter += this.daysInMonth;
+                }
+                return chapters;
+            }
+
+            counter = day * perDay - perDay + 1;
+            counter = day > overflow ? counter + overflow : counter;
 
             for (; iterator < perDay; iterator++) {
                 if (counter > chaptersInBook) {
-                    return;
+                    break;
                 }
                 chapters.push(counter);
-                counter += this.daysInMonth;
+                counter++;
             }
-
             return chapters;
         },
 
@@ -121,7 +182,7 @@
 
             chapters = this._getChapters(book);
 
-            nodeString = '<h2>' + this.books[book].name + '</h2>';
+            nodeString = '<h2>' + this.books[ book ].name + '</h2>';
             nodeString += '<ul>';
             for (iterator = 0; iterator < chapters.length; iterator++) {
                 nodeString += '<li>Kapitel: ' + chapters[ iterator ] + '</li>';

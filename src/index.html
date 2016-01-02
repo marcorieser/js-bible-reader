@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+<h1>Dein heutiger Leseplan</h1>
+<div id="chapters"></div>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.ui.widget.min.js"></script>
+<script src="js/jquery.jed.monthly-reading.js"></script>
+<script>
+    (function ($) {
+        'use strict';
+
+        $(function () {
+            $('html').monthlyReading({
+                books: [
+                    'pslmsSf'
+                ]
+            });
+        });
+    }(jQuery));
+</script>
+</body>
+</html>
